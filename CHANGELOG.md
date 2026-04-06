@@ -9,6 +9,145 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.7.0] - 2026-04-05 - "Windows Reliability and Guidance Cleanup"
+
+> Installable skill library update for Claude Code, Cursor, Codex CLI, Gemini CLI, Antigravity, and related AI coding assistants.
+
+Start here:
+
+- Install: `npx antigravity-awesome-skills`
+- Choose your tool: [README -> Choose Your Tool](https://github.com/sickn33/antigravity-awesome-skills#choose-your-tool)
+- Best skills by tool: [README -> Best Skills By Tool](https://github.com/sickn33/antigravity-awesome-skills#best-skills-by-tool)
+- Bundles: [docs/users/bundles.md](https://github.com/sickn33/antigravity-awesome-skills/blob/main/docs/users/bundles.md)
+- Workflows: [docs/users/workflows.md](https://github.com/sickn33/antigravity-awesome-skills/blob/main/docs/users/workflows.md)
+
+This release focuses on repository reliability rather than new skill volume. It merges the Windows validation and activation hardening from PR #457, adds stronger smoke coverage for the batch activation path, and finishes a broad `## When to Use` cleanup so the repository stays within the current quality bar without carrying contributor-side generated drift.
+
+## New Skills
+
+- **None in this release** - `9.7.0` is a reliability and documentation-hardening release.
+
+## Improvements
+
+- **Windows activation reliability** - makes `scripts/activate-skills.bat` safer around helper discovery, Python probing, archive-prefix overrides, and fallback activation behavior.
+- **Cross-platform validation consistency** - normalizes path handling in registry and validation utilities so Windows path separators no longer create false negatives in tooling and tests.
+- **Windows smoke coverage** - adds dedicated batch-script smoke coverage, including the missing-helper fallback path, and refreshes supporting installer and plugin tests.
+- **Skill guidance cleanup** - adds explicit `## When to Use` sections across a large set of `SKILL.md` files so trigger intent is clearer and warning-budget checks stay green.
+- **Release hygiene** - keeps contributor PRs source-only while letting `main` own the generated catalog sync after merge.
+
+## Who should care
+
+- **Windows users** get a more reliable activation path and fewer path-related validation surprises.
+- **Maintainers** get cleaner contributor PR handling, better smoke coverage, and a release path aligned with the current generated-artifact contract.
+- **Anyone browsing skills directly** gets clearer `When to Use` guidance across a much larger portion of the library.
+
+## Credits
+
+- **[@Al-Garadi](https://github.com/Al-Garadi)** for the Windows validation and skill-guidance cleanup merged in PR #457.
+
+## [9.6.0] - 2026-04-04 - "Psychology and SEO Growth Packs"
+
+> Installable skill library update for Claude Code, Cursor, Codex CLI, Gemini CLI, Antigravity, and related AI coding assistants.
+
+Start here:
+
+- Install: `npx antigravity-awesome-skills`
+- Choose your tool: [README -> Choose Your Tool](https://github.com/sickn33/antigravity-awesome-skills#choose-your-tool)
+- Best skills by tool: [README -> Best Skills By Tool](https://github.com/sickn33/antigravity-awesome-skills#best-skills-by-tool)
+- Bundles: [docs/users/bundles.md](https://github.com/sickn33/antigravity-awesome-skills/blob/main/docs/users/bundles.md)
+- Workflows: [docs/users/workflows.md](https://github.com/sickn33/antigravity-awesome-skills/blob/main/docs/users/workflows.md)
+
+This release folds the full open PR batch into `main` and centers on two major content expansions for growth teams. It adds an SEO/AEO content engine and a large psychology-driven marketing pack, while also tightening the web-app skill card hover state and pulling in the latest `yaml` patch release so the repository and installer surface stay current.
+
+## New Skills
+
+- **SEO-AEO Engine bundle** - merges PR #446 with 8 skills for keyword research, content clustering, landing pages, long-form blog structure, internal linking, metadata, schema, and SEO/AEO auditing.
+- **Psychology skills pack** - merges PR #451 with 20 research-backed skills for profiling, persuasion, pricing psychology, onboarding, pitch strategy, UX persuasion, copywriting, and visual-emotion design.
+
+## Improvements
+
+- **Web app hover stability** - merges PR #449 to keep the home-page `SkillCard` readable on hover with a lighter lift/shadow treatment instead of palette inversion.
+- **Dependency refresh** - merges PR #450 to bump `yaml` from `2.8.2` to `2.8.3`.
+- **README credit sync** - refreshes contributor and community-source credits on `main` immediately after the merged PR batch, including the upstream `mrprewsh/seo-aeo-engine` source.
+
+## Who should care
+
+- **Growth, SEO, and content teams** get a full pipeline for keyword discovery, cluster planning, structured landing pages, schema, internal linking, and publish-time audits.
+- **Marketing and UX teams** get a larger psychology-oriented pack for messaging, pricing, onboarding, social proof, objections, and conversion design.
+- **Web-app users** get a cleaner hover treatment on the skill cards in the homepage UI.
+
+## Credits
+
+- **[@prewsh](https://github.com/prewsh)** and **[mrprewsh/seo-aeo-engine](https://github.com/mrprewsh/seo-aeo-engine)** for the SEO/AEO skill bundle merged in PR #446
+- **[@MMEHDI0606](https://github.com/MMEHDI0606)** for the psychology skills pack merged in PR #451
+- **[@hazemezz123](https://github.com/hazemezz123)** for the skill card hover-state fix merged in PR #449
+- **[@dependabot[bot]](https://github.com/apps/dependabot)** for the `yaml` dependency update merged in PR #450
+
+## [9.5.1] - 2026-04-03 - "npm Runtime Dependency Fix"
+
+> **Patch release to restore `npx antigravity-awesome-skills` installs after the published CLI started failing to resolve `yaml` at runtime**
+
+This release fixes a packaging regression in `9.5.0`. The installer entrypoint loads `tools/lib/skill-utils.js`, which depends on `yaml`, but the published npm package declared that module only as a development dependency. In clean `npx` environments this caused the installer to crash immediately with `Error: Cannot find module 'yaml'`, as reported in issue `#445`.
+
+## New Skills
+
+- **None in this release** — `9.5.1` is a focused patch release for the published npm installer.
+
+## Improvements
+
+- **Runtime dependency fix**: moved `yaml` from `devDependencies` to runtime `dependencies` so the published CLI bundle installs everything required by `tools/bin/install.js` and `tools/lib/skill-utils.js`.
+- **Packaging regression coverage**: extended the npm package contents test to assert that `yaml` remains declared as a runtime dependency for the installer contract.
+- **Installer verification**: re-ran the package dry-run and installer-focused tests to confirm the published artifact and filtered install flow no longer reproduce the missing-module failure from issue `#445`.
+
+## Credits
+
+- **Issue #445 reporter** for isolating the `yaml` packaging regression in the published npm CLI artifact.
+
+## [9.5.0] - 2026-04-03 - "Selective Installs and 30K Stars"
+
+> Installable skill library update for Claude Code, Cursor, Codex CLI, Gemini CLI, Antigravity, OpenCode, and related AI coding assistants.
+
+Start here:
+
+- Install: `npx antigravity-awesome-skills`
+- Choose your tool: [README -> Choose Your Tool](https://github.com/sickn33/antigravity-awesome-skills#choose-your-tool)
+- Best skills by tool: [README -> Best Skills By Tool](https://github.com/sickn33/antigravity-awesome-skills#best-skills-by-tool)
+- Bundles: [docs/users/bundles.md](https://github.com/sickn33/antigravity-awesome-skills/blob/main/docs/users/bundles.md)
+- Workflows: [docs/users/workflows.md](https://github.com/sickn33/antigravity-awesome-skills/blob/main/docs/users/workflows.md)
+
+This release expands the library with four practical additions while making installs much more manageable for context-sensitive runtimes. It merges the current open PR batch, adds `humanize-chinese` directly on `main`, introduces first-class installer filtering by `risk`, `category`, and `tags`, and updates the docs so OpenCode-style `.agents/skills` setups start from a reduced install instead of overwhelming the runtime. It also marks a project milestone: the repository crossed **30K GitHub stars** on April 3, 2026. Thank you to every contributor, source project, issue reporter, and user who keeps this library useful.
+
+## New Skills
+
+- **agentflow** - merges PR #438 to add Kanban-style multi-worker orchestration guidance for Claude Code development pipelines.
+- **uxui-principles** - merges PR #441 to add research-backed UX/UI audit guidance sourced from the `uxuiprinciples/agent-skills` collection.
+- **agentphone** - merges PR #442 to add phone-agent workflows for voice calls, SMS operations, number management, and streaming telephony flows.
+- **humanize-chinese** - adds issue-driven coverage for Chinese AI-text detection, rewriting, academic AIGC reduction, and style-conversion workflows based on `voidborne-d/humanize-chinese`.
+
+## Improvements
+
+- **Selective installer filters** - the npm installer now supports `--risk <csv>`, `--category <csv>`, and `--tags <csv>` with comma-separated include values, trailing `-` exclusions, OR semantics within each flag, exclusion precedence, and AND semantics across dimensions.
+- **Tag-aware filtering** - installer filtering now reads skill frontmatter directly so `tags` can participate in install selection even though `skills_index.json` does not store them.
+- **Recursive install sync** - install manifests now track nested skill paths consistently, and filtered updates prune stale managed entries instead of leaving old skills behind.
+- **OpenCode guidance** - `README.md`, `docs/users/getting-started.md`, and `docs/users/faq.md` now explicitly recommend reduced installs for `.agents/skills` hosts and document the new filter grammar.
+- **Source and contributor credits** - post-merge README credit sync now includes the upstream repositories reflected in this release batch, including `UrRhb/agentflow`, `AgentPhone-AI/skills`, `uxuiprinciples/agent-skills`, and `voidborne-d/humanize-chinese`.
+
+## Who should care
+
+- **Claude Code, Cursor, Codex CLI, and Gemini CLI users** get four new skills covering workflow orchestration, UX/UI review, telephony agents, and Chinese text humanization.
+- **OpenCode and other `.agents/skills` users** now have a supported reduced-install path instead of needing the full library in a context-sensitive runtime.
+- **Maintainers and teams curating smaller agent surfaces** can now ship filtered installs by risk, category, and tag without manually pruning skill folders after each update.
+
+## Credits
+
+- **[@UrRhb](https://github.com/UrRhb)** for the new `agentflow` skill in PR #438
+- **[@modi2meet](https://github.com/modi2meet)** and **[AgentPhone-AI](https://github.com/AgentPhone-AI/skills)** for the new `agentphone` skill in PR #442
+- **[@joselhurtado](https://github.com/joselhurtado)** for the new `uxui-principles` skill in PR #441
+- **[voidborne-d](https://github.com/voidborne-d/humanize-chinese)** for the upstream `humanize-chinese` workflow adapted in issue #437
+- **30,262 GitHub stargazers as of 2026-04-03** for pushing the project past the 30K milestone
+
+Upgrade now: `git pull origin main` to fetch the latest skills.
+
 ## [9.4.0] - 2026-03-31 - "Release Hardening and Credit Sync"
 
 > Installable skill library update for Claude Code, Cursor, Codex CLI, Gemini CLI, Antigravity, and related AI coding assistants.
