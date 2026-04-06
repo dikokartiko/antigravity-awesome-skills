@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const readline = require("readline");
 const readlinePromises = require("readline/promises");
+const { execSync } = require("child_process");
 const { stdin, stdout } = require("process");
 
 const { findProjectRoot } = require("../tools/lib/project-root");
@@ -16,10 +17,19 @@ const {
 
 const HOME = process.env.HOME || process.env.USERPROFILE || "";
 const PROJECT_ROOT = findProjectRoot(__dirname);
-const DEFAULT_BUNDLES_PATH = path.join(PROJECT_ROOT, "data", "editorial-bundles.json");
-const DEFAULT_SKILLS_INDEX_PATH = path.join(PROJECT_ROOT, "data", "skills_index.json");
+const DEFAULT_BUNDLES_PATH = path.join(
+  PROJECT_ROOT,
+  "data",
+  "editorial-bundles.json",
+);
+const DEFAULT_SKILLS_INDEX_PATH = path.join(
+  PROJECT_ROOT,
+  "data",
+  "skills_index.json",
+);
 const DEFAULT_SKILLS_SOURCE_DIR = path.join(PROJECT_ROOT, "skills");
-const SKILL_ID_PATTERN = /^(?!.*(?:^|\/)\.{1,2}(?:\/|$))[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/;
+const SKILL_ID_PATTERN =
+  /^(?!.*(?:^|\/)\.{1,2}(?:\/|$))[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/;
 const MAX_SKILL_RESULTS = 30;
 
 const INSTALL_MODES = [
@@ -38,7 +48,8 @@ const INSTALL_MODES = [
 const PATH_PATTERNS = [
   {
     id: "agents",
-    label: "Codex / OpenCode project local",
+    label:
+      "General path support Github Copilot / Codex / OpenCode project local",
     pattern: ".agents/skills",
     note: "Recommended for per-project installs.",
   },
@@ -100,6 +111,104 @@ function expandHome(input) {
     return input;
   }
   return input.replace(/^~(?=$|\/)/, HOME);
+}
+
+function pickFolder(title = "Select folder") {
+  const platform = process.platform;
+
+  try {
+    if (platform === "darwin") {
+      const escaped = title.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+      const result = execSync(
+        `osascript -e 'POSIX path of (choose folder with prompt "${escaped}")'`,
+        { encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] },
+      ).trim();
+      return result || null;
+    }
+
+    if (platform === "linux") {
+      const escaped = title.replace(/"/g, '\\"');
+      try {
+        const result = execSync(
+          `zenity --file-selection --directory --title="${escaped}" 2>/dev/null`,
+          {
+            encoding: "utf8",
+            stdio: ["pipe", "pipe", "pipe"],
+          },
+        ).trim();
+        return result || null;
+      } catch {
+        try {
+          const result = execSync(
+            `kdialog --getexistingdirectory "${HOME}" --title "${escaped}" 2>/dev/null`,
+            {
+              encoding: "utf8",
+              stdio: ["pipe", "pipe", "pipe"],
+            },
+          ).trim();
+          return result || null;
+        } catch {
+          return null;
+        }
+      }
+    }
+
+    if (platform === "win32") {
+      const escaped = title.replace(/'/g, "''");
+      const psScript = [
+        "Add-Type -AssemblyName System.Windows.Forms",
+        "$d = New-Object System.Windows.Forms.FolderBrowserDialog",
+        `$d.Description = '${escaped}'`,
+        "if ($d.ShowDialog() -eq 'OK') { Write-Output $d.SelectedPath }",
+      ].join(";");
+      const result = execSync(
+        `powershell -NoProfile -NonInteractive -Command "${psScript}"`,
+        {
+          encoding: "utf8",
+          stdio: ["pipe", "pipe", "pipe"],
+        },
+      ).trim();
+      return result || null;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+async function promptFolderPicker(
+  rl,
+  label,
+  { fallbackDefault = process.cwd(), allowEmpty = false } = {},
+) {
+  stdout.write(`\n${label}\n`);
+  stdout.write("  Opening folder explorer...\n");
+
+  const picked = pickFolder(label);
+  if (picked) {
+    stdout.write(`  Selected: ${picked}\n`);
+    return picked;
+  }
+
+  if (allowEmpty) {
+    const answer = await rl.question(
+      `  Explorer unavailable or canceled. Type path (blank for "${fallbackDefault}"): `,
+    );
+    return answer.trim();
+  }
+
+  return promptWithRetry(
+    rl,
+    "  Explorer unavailable or canceled. Type path manually: ",
+    (answer) => {
+      const trimmed = answer.trim();
+      if (!trimmed) {
+        throw new Error("Path is required.");
+      }
+      return trimmed;
+    },
+  );
 }
 
 function resolveUserPath(input, fallbackPath = process.cwd()) {
@@ -237,7 +346,10 @@ function searchSkillCatalog(skillCatalog, query, limit = MAX_SKILL_RESULTS) {
   return skillCatalog
     .map((skill) => ({ skill, score: scoreSkillMatch(skill, tokens) }))
     .filter((entry) => entry.score >= 0)
-    .sort((left, right) => right.score - left.score || left.skill.id.localeCompare(right.skill.id))
+    .sort(
+      (left, right) =>
+        right.score - left.score || left.skill.id.localeCompare(right.skill.id),
+    )
     .slice(0, limit)
     .map((entry) => entry.skill);
 }
@@ -246,7 +358,13 @@ function formatCount(count, noun) {
   return `${count} ${noun}${count === 1 ? "" : "s"}`;
 }
 
-function wrapText(text, { indent = "    ", width = Math.max(40, (stdout.columns || 100) - indent.length - 2) } = {}) {
+function wrapText(
+  text,
+  {
+    indent = "    ",
+    width = Math.max(40, (stdout.columns || 100) - indent.length - 2),
+  } = {},
+) {
   const normalized = String(text || "").trim();
   if (!normalized) {
     return [];
@@ -319,7 +437,11 @@ function renderSelectorScreen({
   const detailLines = currentItem ? buildSelectorDetailLines(currentItem) : [];
   const reservedLines = 8 + detailLines.length;
   const visibleCount = Math.max(4, (stdout.rows || 24) - reservedLines);
-  const offset = clamp(cursor - Math.floor(visibleCount / 2), 0, Math.max(0, items.length - visibleCount));
+  const offset = clamp(
+    cursor - Math.floor(visibleCount / 2),
+    0,
+    Math.max(0, items.length - visibleCount),
+  );
   const end = Math.min(items.length, offset + visibleCount);
 
   stdout.write("\x1b[2J\x1b[H\x1b[?25l");
@@ -329,7 +451,9 @@ function renderSelectorScreen({
   for (let index = offset; index < end; index += 1) {
     const item = items[index];
     const active = index === cursor;
-    const marker = allowMultiple ? `[${selectedIndexes.has(index) ? "x" : " "}]` : `(${selectedIndexes.has(index) ? "x" : " "})`;
+    const marker = allowMultiple
+      ? `[${selectedIndexes.has(index) ? "x" : " "}]`
+      : `(${selectedIndexes.has(index) ? "x" : " "})`;
     const pointer = active ? ">" : " ";
     stdout.write(`${pointer} ${marker} ${item.label}\n`);
   }
@@ -353,13 +477,16 @@ function renderSelectorScreen({
   stdout.write(`${statusMessage || ""}\n`);
 }
 
-async function runCheckboxSelector(rl, {
-  title,
-  instructions,
-  items,
-  allowMultiple = true,
-  defaultSelectedIndexes = [],
-}) {
+async function runCheckboxSelector(
+  rl,
+  {
+    title,
+    instructions,
+    items,
+    allowMultiple = true,
+    defaultSelectedIndexes = [],
+  },
+) {
   if (!Array.isArray(items) || items.length === 0) {
     throw new Error("No items available for selection.");
   }
@@ -375,13 +502,17 @@ async function runCheckboxSelector(rl, {
   stdin.resume();
 
   let cursor = clamp(defaultSelectedIndexes[0] ?? 0, 0, items.length - 1);
-  let selectedIndexes = new Set(defaultSelectedIndexes.filter((index) => index >= 0 && index < items.length));
+  let selectedIndexes = new Set(
+    defaultSelectedIndexes.filter(
+      (index) => index >= 0 && index < items.length,
+    ),
+  );
   if (!allowMultiple && selectedIndexes.size === 0) {
     selectedIndexes.add(cursor);
   }
   let statusMessage = allowMultiple
-    ? 'Keys: ↑/↓ move, space toggle, a toggle all, enter confirm, q cancel'
-    : 'Keys: ↑/↓ move, space select, enter confirm, q cancel';
+    ? "Keys: ↑/↓ move, space toggle, a toggle all, enter confirm, q cancel"
+    : "Keys: ↑/↓ move, space select, enter confirm, q cancel";
 
   return new Promise((resolve, reject) => {
     const cleanup = () => {
@@ -404,7 +535,15 @@ async function runCheckboxSelector(rl, {
     };
 
     const rerender = () => {
-      renderSelectorScreen({ title, instructions, items, cursor, selectedIndexes, allowMultiple, statusMessage });
+      renderSelectorScreen({
+        title,
+        instructions,
+        items,
+        cursor,
+        selectedIndexes,
+        allowMultiple,
+        statusMessage,
+      });
     };
 
     const onKeypress = (_str, key = {}) => {
@@ -479,13 +618,21 @@ async function runCheckboxSelector(rl, {
   });
 }
 
-function resolveInstallTarget({ baseDir, patternChoice, customPattern, exactPath }) {
+function resolveInstallTarget({
+  baseDir,
+  patternChoice,
+  customPattern,
+  exactPath,
+}) {
   if (patternChoice.id === "exact-path") {
     return resolveUserPath(exactPath, baseDir);
   }
 
   const resolvedBaseDir = resolveUserPath(baseDir);
-  const pattern = patternChoice.id === "custom-relative" ? customPattern : patternChoice.pattern;
+  const pattern =
+    patternChoice.id === "custom-relative"
+      ? customPattern
+      : patternChoice.pattern;
   if (!pattern || !pattern.trim()) {
     throw new Error("Pattern must not be empty.");
   }
@@ -525,7 +672,10 @@ function assertTargetSafe(targetPath, sourceSkillsDir) {
   const resolvedTarget = path.resolve(targetPath);
   const resolvedSource = path.resolve(sourceSkillsDir);
   const relative = path.relative(resolvedSource, resolvedTarget);
-  if (relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative))) {
+  if (
+    relative === "" ||
+    (!relative.startsWith("..") && !path.isAbsolute(relative))
+  ) {
     throw new Error(
       `Refusing to install into ${resolvedTarget} because it is inside the repository source skills directory.`,
     );
@@ -545,9 +695,13 @@ function installSelectedSkills({
 
   assertTargetSafe(targetPath, sourceSkillsDir);
 
-  const missingSkills = skillIds.filter((skillId) => !fs.existsSync(path.join(sourceSkillsDir, skillId)));
+  const missingSkills = skillIds.filter(
+    (skillId) => !fs.existsSync(path.join(sourceSkillsDir, skillId)),
+  );
   if (missingSkills.length > 0) {
-    throw new Error(`Selected skills missing from local repo: ${missingSkills.join(", ")}`);
+    throw new Error(
+      `Selected skills missing from local repo: ${missingSkills.join(", ")}`,
+    );
   }
 
   ensureTargetIsDirectory(targetPath);
@@ -598,7 +752,9 @@ async function promptBundleSelection(rl) {
   const bundles = loadEditorialBundles();
   const groups = buildBundleGroups(bundles);
   const defaultGroupIndex = Math.max(
-    groups.findIndex((group) => group.name.toLowerCase().includes("essentials")),
+    groups.findIndex((group) =>
+      group.name.toLowerCase().includes("essentials"),
+    ),
     0,
   );
 
@@ -613,15 +769,20 @@ async function promptBundleSelection(rl) {
     defaultSelectedIndexes: [defaultGroupIndex],
   });
 
-  const candidateBundles = selectedGroupIndexes.flatMap((index) => groups[index].bundles);
+  const candidateBundles = selectedGroupIndexes.flatMap(
+    (index) => groups[index].bundles,
+  );
   const defaultBundleIndex = Math.max(
-    candidateBundles.findIndex((bundle) => bundle.name.toLowerCase() === "essentials"),
+    candidateBundles.findIndex(
+      (bundle) => bundle.name.toLowerCase() === "essentials",
+    ),
     0,
   );
 
   const selectedBundleIndexes = await runCheckboxSelector(rl, {
     title: "Bundles",
-    instructions: "Select one or more bundles. Details show the skills inside the highlighted bundle.",
+    instructions:
+      "Select one or more bundles. Details show the skills inside the highlighted bundle.",
     items: candidateBundles.map((bundle) => ({
       label: `${bundle.name} [${bundle.group}] (${formatCount(extractSkillIds([bundle]).length, "skill")})`,
       description: bundle.description,
@@ -631,10 +792,14 @@ async function promptBundleSelection(rl) {
     defaultSelectedIndexes: [defaultBundleIndex],
   });
 
-  const selectedBundles = selectedBundleIndexes.map((index) => candidateBundles[index]);
+  const selectedBundles = selectedBundleIndexes.map(
+    (index) => candidateBundles[index],
+  );
   const skillIds = extractSkillIds(selectedBundles);
   if (skillIds.length === 0) {
-    throw new Error("The selected bundles did not resolve to any installable skills.");
+    throw new Error(
+      "The selected bundles did not resolve to any installable skills.",
+    );
   }
 
   stdout.write("\nSelected bundle skills\n");
@@ -687,10 +852,14 @@ async function promptSingleSkillSelection(rl) {
       selectionLabel: `Skills  : ${selectedSkills.map((skill) => skill.id).join(", ")}`,
       manifestSelection: {
         mode: "skill",
-        categories: Array.from(new Set(selectedSkills.map((skill) => skill.category))).sort(),
+        categories: Array.from(
+          new Set(selectedSkills.map((skill) => skill.category)),
+        ).sort(),
         bundles: [],
       },
-      skillIds: Array.from(new Set(selectedSkills.map((skill) => skill.id))).sort(),
+      skillIds: Array.from(
+        new Set(selectedSkills.map((skill) => skill.id)),
+      ).sort(),
     };
   }
 }
@@ -704,7 +873,9 @@ async function runTui() {
 
   try {
     stdout.write("\nAntigravity Skills TUI\n");
-    stdout.write("Select install mode, target folder, and path pattern for installation.\n\n");
+    stdout.write(
+      "Select install mode, target folder, and path pattern for installation.\n\n",
+    );
 
     const installMode = await promptInstallMode(rl);
     const selection =
@@ -713,13 +884,22 @@ async function runTui() {
         : await promptBundleSelection(rl);
     const { selectionLabel, skillIds, manifestSelection } = selection;
 
-    const baseDir = await rl.question(`\nBase folder for pattern resolution [${process.cwd()}]: `);
+    const baseDir = await promptFolderPicker(
+      rl,
+      "Base folder for pattern resolution",
+      {
+        fallbackDefault: process.cwd(),
+        allowEmpty: true,
+      },
+    );
 
     const patternIndexes = await runCheckboxSelector(rl, {
       title: "Path Patterns",
       instructions: "Choose one target path pattern.",
       items: PATH_PATTERNS.map((patternChoice) => ({
-        label: patternChoice.pattern ? `${patternChoice.label} -> ${patternChoice.pattern}` : patternChoice.label,
+        label: patternChoice.pattern
+          ? `${patternChoice.label} -> ${patternChoice.pattern}`
+          : patternChoice.label,
         description: patternChoice.note,
       })),
       allowMultiple: false,
@@ -743,17 +923,10 @@ async function runTui() {
         },
       );
     } else if (patternChoice.id === "exact-path") {
-      exactPath = await promptWithRetry(
-        rl,
-        "Exact target path: ",
-        (answer) => {
-          const trimmed = answer.trim();
-          if (!trimmed) {
-            throw new Error("Path is required.");
-          }
-          return trimmed;
-        },
-      );
+      exactPath = await promptFolderPicker(rl, "Exact target path", {
+        fallbackDefault: process.cwd(),
+        allowEmpty: false,
+      });
     }
 
     const targetPath = resolveInstallTarget({
@@ -784,7 +957,9 @@ async function runTui() {
     stdout.write(`  Skills  : ${skillIds.length}\n`);
     stdout.write(`  Base    : ${resolveUserPath(baseDir)}\n`);
     stdout.write(`  Target  : ${targetPath}\n`);
-    stdout.write(`  Sync    : ${pruneManagedEntries ? "sync selected skills" : "append without pruning"}\n`);
+    stdout.write(
+      `  Sync    : ${pruneManagedEntries ? "sync selected skills" : "append without pruning"}\n`,
+    );
 
     const confirmed = await promptWithRetry(
       rl,
