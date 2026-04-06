@@ -227,19 +227,21 @@ function readInstallManifest(targetPath) {
   }
 }
 
-function writeInstallManifest(targetPath, installEntries) {
+function writeInstallManifest(targetPath, installEntries, options = {}) {
   const manifestPath = path.join(targetPath, INSTALL_MANIFEST_FILE);
+  const payload = {
+    schemaVersion: 1,
+    updatedAt: new Date().toISOString(),
+    entries: installEntries.slice().sort(),
+  };
+
+  if (options && options.selection && typeof options.selection === "object") {
+    payload.selection = options.selection;
+  }
+
   fs.writeFileSync(
     manifestPath,
-    JSON.stringify(
-      {
-        schemaVersion: 1,
-        updatedAt: new Date().toISOString(),
-        entries: installEntries.slice().sort(),
-      },
-      null,
-      2,
-    ) + "\n",
+    JSON.stringify(payload, null, 2) + "\n",
     "utf8",
   );
 }
