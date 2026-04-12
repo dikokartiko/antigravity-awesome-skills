@@ -895,46 +895,46 @@ async function runTui() {
 
     const patternIndexes = await runCheckboxSelector(rl, {
       title: "Path Patterns",
-      instructions: "Choose one target path pattern.",
+      instructions: "Choose target path pattern(s).",
       items: PATH_PATTERNS.map((patternChoice) => ({
         label: patternChoice.pattern
           ? `${patternChoice.label} -> ${patternChoice.pattern}`
           : patternChoice.label,
         description: patternChoice.note,
       })),
-      allowMultiple: false,
+      allowMultiple: true,
       defaultSelectedIndexes: [0],
     });
 
-    const patternChoice = PATH_PATTERNS[patternIndexes[0]];
-    let customPattern = "";
-    let exactPath = "";
+    const targetPaths = [];
+    for (const idx of patternIndexes) {
+      const patternChoice = PATH_PATTERNS[idx];
+      let customPattern = "";
+      let exactPath = "";
 
-    if (patternChoice.id === "custom-relative") {
-      customPattern = await promptWithRetry(
-        rl,
-        "Custom relative pattern (example: .agents/skills): ",
-        (answer) => {
-          const trimmed = answer.trim();
-          if (!trimmed) {
-            throw new Error("Pattern is required.");
-          }
-          return trimmed;
-        },
+      if (patternChoice.id === "custom-relative") {
+        customPattern = await promptWithRetry(
+          rl,
+          `Custom relative pattern for "${patternChoice.label}" (example: .agents/skills): `,
+          (answer) => {
+            const trimmed = answer.trim();
+            if (!trimmed) {
+              throw new Error("Pattern is required.");
+            }
+            return trimmed;
+          },
+        );
+      } else if (patternChoice.id === "exact-path") {
+        exactPath = await promptFolderPicker(rl, `Exact target path for "${patternChoice.label}"`, {
+          fallbackDefault: process.cwd(),
+          allowEmpty: false,
+        });
+      }
+
+      targetPaths.push(
+        resolveInstallTarget({ baseDir, patternChoice, customPattern, exactPath }),
       );
-    } else if (patternChoice.id === "exact-path") {
-      exactPath = await promptFolderPicker(rl, "Exact target path", {
-        fallbackDefault: process.cwd(),
-        allowEmpty: false,
-      });
     }
-
-    const targetPath = resolveInstallTarget({
-      baseDir,
-      patternChoice,
-      customPattern,
-      exactPath,
-    });
 
     const pruneManagedEntries = await promptWithRetry(
       rl,
@@ -956,7 +956,9 @@ async function runTui() {
     stdout.write(`  ${selectionLabel}\n`);
     stdout.write(`  Skills  : ${skillIds.length}\n`);
     stdout.write(`  Base    : ${resolveUserPath(baseDir)}\n`);
-    stdout.write(`  Target  : ${targetPath}\n`);
+    for (const tp of targetPaths) {
+      stdout.write(`  Target  : ${tp}\n`);
+    }
     stdout.write(
       `  Sync    : ${pruneManagedEntries ? "sync selected skills" : "append without pruning"}\n`,
     );
@@ -981,14 +983,15 @@ async function runTui() {
       return;
     }
 
-    installSelectedSkills({
-      targetPath,
-      skillIds,
-      manifestSelection,
-      pruneManagedEntries,
-    });
-
-    stdout.write(`\nInstalled ${skillIds.length} skills into ${targetPath}\n`);
+    for (const tp of targetPaths) {
+      installSelectedSkills({
+        targetPath: tp,
+        skillIds,
+        manifestSelection,
+        pruneManagedEntries,
+      });
+      stdout.write(`\nInstalled ${skillIds.length} skills into ${tp}\n`);
+    }
     stdout.write("Done.\n");
   } finally {
     rl.close();
