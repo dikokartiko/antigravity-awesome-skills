@@ -43,7 +43,7 @@ Integracao completa com Telegram Bot API. Setup com BotFather, mensagens, webhoo
 
 Skill para implementar bots profissionais no Telegram usando a Bot API oficial. Suporta Node.js/TypeScript e Python.
 
-## Overview
+### Overview
 
 A Telegram Bot API permite criar bots que interagem com usuarios via mensagens, comandos, inline keyboards, pagamentos e muito mais. Bots sao criados pelo @BotFather e autenticados via token unico.
 
@@ -574,3 +574,8 @@ Se receber erro 429 (Too Many Requests), respeite o `retry_after` retornado.
 - `instagram` - Complementary skill for enhanced analysis
 - `social-orchestrator` - Complementary skill for enhanced analysis
 - `whatsapp-cloud-api` - Complementary skill for enhanced analysis
+
+## Limitations
+- Use this skill only when the task clearly matches the scope described above.
+- Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
+- Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

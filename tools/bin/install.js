@@ -315,14 +315,25 @@ function installSkillsIntoTarget(tempDir, target, installEntries) {
       return;
     }
     const src = path.join(repoSkills, name);
-    const dest = path.join(target, name);
+    const destName = normalizeInstallEntry(name);
+    const dest = path.join(target, destName);
     copyRecursiveSync(src, dest, repoSkills);
   });
 }
 
+function normalizeInstallEntry(entry) {
+  if (entry === "docs") {
+    return entry;
+  }
+  return typeof entry === "string" && entry.startsWith("skills/")
+    ? entry.slice("skills/".length)
+    : entry;
+}
+
 function resolveManagedPath(targetPath, entry) {
+  const normalizedEntry = normalizeInstallEntry(entry);
   const resolvedTargetPath = path.resolve(targetPath);
-  const candidate = path.resolve(targetPath, entry);
+  const candidate = path.resolve(targetPath, normalizedEntry);
   const relative = path.relative(resolvedTargetPath, candidate);
   if (relative.startsWith("..") || path.isAbsolute(relative)) {
     return null;
@@ -349,10 +360,11 @@ function readInstallManifest(targetPath) {
 
 function writeInstallManifest(targetPath, installEntries, options = {}) {
   const manifestPath = path.join(targetPath, INSTALL_MANIFEST_FILE);
+  const normalizedEntries = [...new Set(installEntries.map(normalizeInstallEntry))].sort();
   const payload = {
     schemaVersion: 1,
     updatedAt: new Date().toISOString(),
-    entries: installEntries.slice().sort(),
+    entries: normalizedEntries,
   };
 
   if (options && options.selection && typeof options.selection === "object") {
@@ -367,9 +379,10 @@ function writeInstallManifest(targetPath, installEntries, options = {}) {
 }
 
 function pruneRemovedEntries(targetPath, previousEntries, installEntries) {
-  const next = new Set(installEntries);
+  const next = new Set(installEntries.map(normalizeInstallEntry));
   for (const entry of previousEntries) {
-    if (next.has(entry)) {
+    const normalizedEntry = normalizeInstallEntry(entry);
+    if (next.has(normalizedEntry)) {
       continue;
     }
     const candidate = resolveManagedPath(targetPath, entry);
@@ -378,7 +391,7 @@ function pruneRemovedEntries(targetPath, previousEntries, installEntries) {
       continue;
     }
     fs.rmSync(candidate, { recursive: true, force: true });
-    console.log(`  Removed stale managed entry: ${entry}`);
+    console.log(`  Removed stale managed entry: ${normalizedEntry}`);
   }
 }
 
@@ -571,6 +584,7 @@ module.exports = {
   isOpenCodeStylePath,
   main,
   matchesInstallSelectors,
+  normalizeInstallEntry,
   parseSelectorArg,
   pruneRemovedEntries,
   readInstallManifest,
