@@ -251,4 +251,30 @@ describe('refresh-skills plugin security', () => {
 
     expect(res.statusCode).toBe(400);
   });
+
+  it('rejects unsafe archive entry paths before fallback extraction', async () => {
+    const {
+      assertSafeArchiveEntries,
+      validateArchiveEntryName,
+    } = await import('../../refresh-skills-plugin.js');
+
+    expect(validateArchiveEntryName('antigravity-awesome-skills-main/skills/demo/SKILL.md')).toBe(true);
+    expect(validateArchiveEntryName('../outside')).toBe(false);
+    expect(validateArchiveEntryName('/tmp/outside')).toBe(false);
+    expect(validateArchiveEntryName('other-root/skills/demo/SKILL.md')).toBe(false);
+    expect(() => assertSafeArchiveEntries(['antigravity-awesome-skills-main/../../outside'])).toThrow(
+      'Unsafe archive entry path',
+    );
+  });
+
+  it('rejects symlink entries in tar archive listings', async () => {
+    const { assertSafeArchiveEntries } = await import('../../refresh-skills-plugin.js');
+
+    expect(() =>
+      assertSafeArchiveEntries(
+        ['antigravity-awesome-skills-main/skills/demo -> /tmp/outside'],
+        { rejectSymlinks: true },
+      ),
+    ).toThrow('Unsafe archive symlink entry');
+  });
 });

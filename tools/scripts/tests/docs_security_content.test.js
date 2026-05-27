@@ -123,6 +123,38 @@ const rules = [
   },
 ];
 
+const textFileExtensions = new Set([
+  '.cjs',
+  '.js',
+  '.json',
+  '.md',
+  '.mjs',
+  '.py',
+  '.sh',
+  '.ts',
+  '.txt',
+  '.yaml',
+  '.yml',
+]);
+
+const realisticSecretPatterns = [
+  {
+    id: 'aws-example-access-key',
+    message: 'realistic AWS access key example',
+    regex: /AKIAIOSFODNN7EXAMPLE/,
+  },
+  {
+    id: 'aws-example-secret-key',
+    message: 'realistic AWS secret access key example',
+    regex: /wJalrXUtnFEMI\/K7MDENG\/bPxRfiCYEXAMPLEKEY/,
+  },
+  {
+    id: 'pem-private-key-placeholder',
+    message: 'literal PEM private key placeholder',
+    regex: /^\s*-----BEGIN PRIVATE KEY-----\s*$/m,
+  },
+];
+
 function collectSkillFiles(basePaths) {
   const files = new Set();
 
@@ -161,6 +193,31 @@ function addViolation(relativePath, lineNumber, rule) {
   violations.push(`${relativePath}:${lineNumber}: ${rule.message}`);
 }
 
+function findTextFiles(rootPath) {
+  const files = [];
+  const queue = [rootPath];
+
+  while (queue.length > 0) {
+    const current = queue.pop();
+    const entries = fs.readdirSync(current, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(current, entry.name);
+
+      if (entry.isDirectory()) {
+        queue.push(fullPath);
+        continue;
+      }
+
+      if (entry.isFile() && textFileExtensions.has(path.extname(entry.name))) {
+        files.push(fullPath);
+      }
+    }
+  }
+
+  return files;
+}
+
 for (const filePath of skillFiles) {
   const content = fs.readFileSync(filePath, 'utf8');
   const lines = content.split(/\r?\n/);
@@ -180,6 +237,22 @@ for (const filePath of skillFiles) {
       addViolation(relativePath, index + 1, rule);
       rule.regex.lastIndex = 0;
     }
+  }
+}
+
+for (const filePath of findTextFiles(path.join(repoRoot, 'skills'))) {
+  const content = fs.readFileSync(filePath, 'utf8');
+  const relativePath = path.relative(repoRoot, filePath);
+
+  for (const rule of realisticSecretPatterns) {
+    const match = rule.regex.exec(content);
+    if (!match) {
+      continue;
+    }
+
+    const lineNumber = content.slice(0, match.index).split(/\r?\n/).length;
+    addViolation(relativePath, lineNumber, rule);
+    rule.regex.lastIndex = 0;
   }
 }
 

@@ -18,6 +18,7 @@ const REPO_TAR_URL = 'https://github.com/sickn33/antigravity-awesome-skills/arch
 const REPO_ZIP_URL = 'https://github.com/sickn33/antigravity-awesome-skills/archive/refs/heads/main.zip';
 const COMMITS_API_URL = 'https://api.github.com/repos/sickn33/antigravity-awesome-skills/commits/main';
 const SHA_FILE = path.join(__dirname, '.last-sync-sha');
+const ARCHIVE_ROOT = 'antigravity-awesome-skills-main/';
 
 // ─── Utility helpers ───
 
@@ -105,6 +106,99 @@ function isTokenAuthorized(req) {
     }
 
     return crypto.timingSafeEqual(expected, provided);
+}
+
+function isPathInside(parentPath, childPath) {
+    const relative = path.relative(parentPath, childPath);
+    return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+}
+
+function normalizeArchiveEntryName(entryName) {
+    return String(entryName || '').replace(/\\/g, '/').replace(/^\.\//, '');
+}
+
+function validateArchiveEntryName(entryName) {
+    const normalized = normalizeArchiveEntryName(entryName);
+    const parts = normalized.split('/').filter(Boolean);
+
+    if (!normalized || normalized.startsWith('/') || normalized.includes('\0')) {
+        return false;
+    }
+    if (path.isAbsolute(normalized) || parts.some((part) => part === '..' || part === '.')) {
+        return false;
+    }
+    return normalized === ARCHIVE_ROOT.slice(0, -1) || normalized.startsWith(ARCHIVE_ROOT);
+}
+
+function parseTarVerboseEntryNames(listing) {
+    return String(listing || '')
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+            const match = line.match(/^\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+(.+)$/);
+            return match ? match[1].replace(/\s+->\s+.*$/, '') : line;
+        });
+}
+
+function assertSafeArchiveEntries(entries, { rejectSymlinks = false } = {}) {
+    for (const rawEntry of entries) {
+        const entry = String(rawEntry || '').trim();
+        if (!entry) continue;
+        if (rejectSymlinks && /\s+->\s+/.test(entry)) {
+            throw new Error(`Unsafe archive symlink entry: ${entry}`);
+        }
+        if (!validateArchiveEntryName(entry.replace(/\s+->\s+.*$/, ''))) {
+            throw new Error(`Unsafe archive entry path: ${entry}`);
+        }
+    }
+}
+
+function assertSafeExtractedTree(extractedRoot, tempDir) {
+    const tempRealPath = fs.realpathSync(tempDir);
+    const rootRealPath = fs.realpathSync(extractedRoot);
+
+    if (!isPathInside(tempRealPath, rootRealPath)) {
+        throw new Error(`Archive extracted outside temporary root: ${extractedRoot}`);
+    }
+
+    const stack = [extractedRoot];
+    while (stack.length) {
+        const current = stack.pop();
+        for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+            const entryPath = path.join(current, entry.name);
+            const realPath = fs.realpathSync(entryPath);
+            if (!isPathInside(tempRealPath, realPath)) {
+                throw new Error(`Archive entry escapes temporary root: ${entryPath}`);
+            }
+            if (entry.isSymbolicLink()) {
+                throw new Error(`Archive contains a symlink entry: ${entryPath}`);
+            }
+            if (entry.isDirectory()) {
+                stack.push(entryPath);
+            }
+        }
+    }
+}
+
+function listArchiveEntries(archivePath, useTar) {
+    if (useTar) {
+        const verbose = execSync(`tar -tzvf "${archivePath}"`, { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'pipe'] });
+        assertSafeArchiveEntries(parseTarVerboseEntryNames(verbose), { rejectSymlinks: true });
+        return;
+    }
+
+    if (globalThis.process?.platform === 'win32') {
+        const listing = execSync(
+            `powershell -NoProfile -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [IO.Compression.ZipFile]::OpenRead('${archivePath}').Entries | ForEach-Object { $_.FullName }"`,
+            { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'pipe'] },
+        );
+        assertSafeArchiveEntries(listing.split(/\r?\n/));
+        return;
+    }
+
+    const listing = execSync(`unzip -Z1 "${archivePath}"`, { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'pipe'] });
+    assertSafeArchiveEntries(listing.split(/\r?\n/));
 }
 
 /** Run a git command in the project root. */
@@ -247,13 +341,15 @@ async function syncWithArchive() {
         console.log(`[Sync] Downloading (${useTar ? 'tar.gz' : 'zip'})...`);
         await downloadFile(useTar ? REPO_TAR_URL : REPO_ZIP_URL, archivePath);
 
-        // 2. Extract
+        // 2. Validate and extract
         console.log('[Sync] Extracting...');
         if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
         fs.mkdirSync(tempDir, { recursive: true });
 
+        listArchiveEntries(archivePath, useTar);
+
         if (useTar) {
-            execSync(`tar -xzf "${archivePath}" -C "${tempDir}"`, { stdio: 'ignore' });
+            execSync(`tar -xzf "${archivePath}" --no-same-owner -C "${tempDir}"`, { stdio: 'ignore' });
         } else if (globalThis.process?.platform === 'win32') {
             execSync(`powershell -Command "Expand-Archive -Path '${archivePath}' -DestinationPath '${tempDir}' -Force"`, { stdio: 'ignore' });
         } else {
@@ -266,6 +362,11 @@ async function syncWithArchive() {
         const srcIndex = path.join(extractedRoot, 'skills_index.json');
         const destSkills = path.join(ROOT_DIR, 'skills');
         const destIndex = path.join(ROOT_DIR, 'skills_index.json');
+
+        if (!fs.existsSync(extractedRoot)) {
+            throw new Error('Expected archive root folder not found in downloaded archive.');
+        }
+        assertSafeExtractedTree(extractedRoot, tempDir);
 
         if (!fs.existsSync(srcSkills)) {
             throw new Error('Skills folder not found in downloaded archive.');
@@ -397,5 +498,12 @@ export default function refreshSkillsPlugin() {
         }
     };
 }
+
+export {
+    assertSafeArchiveEntries,
+    assertSafeExtractedTree,
+    normalizeArchiveEntryName,
+    validateArchiveEntryName,
+};
 
 export { isAllowedDevOrigin };

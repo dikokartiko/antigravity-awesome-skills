@@ -1,6 +1,6 @@
 {
   "generatedAt": "2026-02-08T00:00:00.000Z",
-  "total": 1453,
+  "total": 1470,
   "skills": [
     {
       "id": "00-andruia-consultant",
@@ -1476,27 +1476,27 @@
     {
       "id": "andrej-karpathy",
       "name": "andrej-karpathy",
-      "description": "Agente que simula Andrej Karpathy — ex-Director of AI da Tesla, co-fundador da OpenAI, fundador da Eureka Labs, e o maior educador de deep learning do mundo.",
+      "description": "Behavioral guidelines to reduce common LLM coding mistakes. Use when writing, reviewing, or refactoring code to avoid overcomplication, make surgical changes, surface assumptions, and define verifiable success criteria.",
       "category": "data-ai",
       "tags": [
-        "persona",
-        "ai-expert",
-        "deep-learning",
-        "education"
+        "coding-guidelines",
+        "code-review",
+        "llm-coding",
+        "simplicity"
       ],
       "triggers": [
-        "persona",
-        "ai-expert",
-        "deep-learning",
-        "education",
+        "coding-guidelines",
+        "code-review",
+        "llm-coding",
+        "simplicity",
         "andrej",
         "karpathy",
-        "agente",
-        "que",
-        "simula",
-        "ex",
-        "director",
-        "ai"
+        "behavioral",
+        "guidelines",
+        "reduce",
+        "common",
+        "llm",
+        "coding"
       ],
       "path": "skills/andrej-karpathy/SKILL.md"
     },
@@ -6812,6 +6812,34 @@
         "scheduling"
       ],
       "path": "skills/bevy-ecs-expert/SKILL.md"
+    },
+    {
+      "id": "bilig-workpaper",
+      "name": "bilig-workpaper",
+      "description": "Use formula-backed WorkPaper JSON and MCP tools for agent spreadsheet tasks without driving Excel or a browser UI.",
+      "category": "development",
+      "tags": [
+        "spreadsheets",
+        "formulas",
+        "mcp",
+        "xlsx",
+        "typescript"
+      ],
+      "triggers": [
+        "spreadsheets",
+        "formulas",
+        "mcp",
+        "xlsx",
+        "typescript",
+        "bilig",
+        "workpaper",
+        "formula",
+        "backed",
+        "json",
+        "agent",
+        "spreadsheet"
+      ],
+      "path": "skills/bilig-workpaper/SKILL.md"
     },
     {
       "id": "bill-gates",
@@ -14030,6 +14058,37 @@
       "path": "skills/fixing-motion-performance/SKILL.md"
     },
     {
+      "id": "flowhunt-skill",
+      "name": "flowhunt-skill",
+      "description": "Automation discovery audit skill. Walks through a 5-question workflow intake, then audits Gmail/Calendar/Slack/task trackers to identify automation opportunities. Use when a user wants to discover what processes in their business can be automated.",
+      "category": "business",
+      "tags": [
+        "automation",
+        "discovery",
+        "audit",
+        "gmail",
+        "calendar",
+        "slack",
+        "productivity",
+        "workflow"
+      ],
+      "triggers": [
+        "automation",
+        "discovery",
+        "audit",
+        "gmail",
+        "calendar",
+        "slack",
+        "productivity",
+        "workflow",
+        "flowhunt",
+        "skill",
+        "walks",
+        "through"
+      ],
+      "path": "skills/flowhunt-skill/SKILL.md"
+    },
+    {
       "id": "flutter-expert",
       "name": "flutter-expert",
       "description": "Master Flutter development with Dart 3, advanced widgets, and multi-platform deployment.",
@@ -15338,6 +15397,33 @@
         "function"
       ],
       "path": "skills/gemini-api-integration/SKILL.md"
+    },
+    {
+      "id": "geminiignore-finops",
+      "name": "geminiignore-finops",
+      "description": "Configure and optimize .geminiignore files for AI context window efficiency and token cost reduction (FinOps).",
+      "category": "data-ai",
+      "tags": [
+        "finops",
+        "context-management",
+        "token-optimization",
+        "geminiignore"
+      ],
+      "triggers": [
+        "finops",
+        "context-management",
+        "token-optimization",
+        "geminiignore",
+        "configure",
+        "optimize",
+        "files",
+        "ai",
+        "context",
+        "window",
+        "efficiency",
+        "token"
+      ],
+      "path": "skills/geminiignore-finops/SKILL.md"
     },
     {
       "id": "geo-fundamentals",
@@ -17616,6 +17702,37 @@
         "vulnerabilities"
       ],
       "path": "skills/idor-testing/SKILL.md"
+    },
+    {
+      "id": "ii-commons",
+      "name": "ii-commons",
+      "description": "Deterministic search across arXiv, PubMed/PMC, and US policy corpora with daily freshness cutoffs.",
+      "category": "general",
+      "tags": [
+        "research",
+        "arxiv",
+        "pubmed",
+        "pmc",
+        "policy",
+        "retrieval",
+        "cli",
+        "codex"
+      ],
+      "triggers": [
+        "research",
+        "arxiv",
+        "pubmed",
+        "pmc",
+        "policy",
+        "retrieval",
+        "cli",
+        "codex",
+        "ii",
+        "commons",
+        "deterministic",
+        "search"
+      ],
+      "path": "skills/ii-commons/SKILL.md"
     },
     {
       "id": "ilya-sutskever",
@@ -21094,6 +21211,36 @@
       "path": "skills/mcp-builder-ms/SKILL.md"
     },
     {
+      "id": "mcp-tool-developer",
+      "name": "mcp-tool-developer",
+      "description": "Build Model Context Protocol (MCP) servers and tools from scratch. Full-stack MCP development with TypeScript/Python, testing, deployment, and registry publishing.",
+      "category": "infrastructure",
+      "tags": [
+        "mcp",
+        "ai-agent",
+        "tool-development",
+        "typescript",
+        "python",
+        "llm",
+        "model-context-protocol"
+      ],
+      "triggers": [
+        "mcp",
+        "ai-agent",
+        "tool-development",
+        "typescript",
+        "python",
+        "llm",
+        "model-context-protocol",
+        "developer",
+        "model",
+        "context",
+        "protocol",
+        "servers"
+      ],
+      "path": "skills/mcp-tool-developer/SKILL.md"
+    },
+    {
       "id": "memory-forensics",
       "name": "memory-forensics",
       "description": "Comprehensive techniques for acquiring, analyzing, and extracting artifacts from memory dumps for incident response and malware analysis.",
@@ -21185,6 +21332,31 @@
       "path": "skills/mental-health-analyzer/SKILL.md"
     },
     {
+      "id": "mercury-mcp",
+      "name": "mercury-mcp",
+      "description": "Cheatsheet for the Mercury (proton) MCP tools. Use when connected to the Mercury MCP server to look up which mercury_* tool to call for messaging teammates, threads, tasks, automations, or admin team-graph edits.",
+      "category": "general",
+      "tags": [
+        "mercury",
+        "mcp"
+      ],
+      "triggers": [
+        "mercury",
+        "mcp",
+        "cheatsheet",
+        "proton",
+        "connected",
+        "server",
+        "look",
+        "up",
+        "which",
+        "call",
+        "messaging",
+        "teammates"
+      ],
+      "path": "skills/mercury-mcp/SKILL.md"
+    },
+    {
       "id": "mermaid-expert",
       "name": "mermaid-expert",
       "description": "Create Mermaid diagrams for flowcharts, sequences, ERDs, and architectures. Masters syntax for all diagram types and styling.",
@@ -21207,6 +21379,31 @@
         "styling"
       ],
       "path": "skills/mermaid-expert/SKILL.md"
+    },
+    {
+      "id": "mesh-memory",
+      "name": "mesh-memory",
+      "description": "Self-hosted semantic memory for AI agents via MCP. Save worklogs, decisions, and notes, then recall them across sessions by meaning, not keyword. Postgres + pgvector with auto-tagging.",
+      "category": "infrastructure",
+      "tags": [
+        "mesh",
+        "memory"
+      ],
+      "triggers": [
+        "mesh",
+        "memory",
+        "self",
+        "hosted",
+        "semantic",
+        "ai",
+        "agents",
+        "via",
+        "mcp",
+        "save",
+        "worklogs",
+        "decisions"
+      ],
+      "path": "skills/mesh-memory/SKILL.md"
     },
     {
       "id": "metasploit-framework",
@@ -22567,6 +22764,34 @@
       "path": "skills/new-rails-project/SKILL.md"
     },
     {
+      "id": "news-sentiment-engine",
+      "name": "news-sentiment-engine",
+      "description": "Multi-source RSS news aggregation with Claude-powered sentiment analysis and structured briefing output",
+      "category": "general",
+      "tags": [
+        "news",
+        "rss",
+        "sentiment-analysis",
+        "briefing",
+        "research"
+      ],
+      "triggers": [
+        "news",
+        "rss",
+        "sentiment-analysis",
+        "briefing",
+        "research",
+        "sentiment",
+        "engine",
+        "multi",
+        "source",
+        "aggregation",
+        "claude",
+        "powered"
+      ],
+      "path": "skills/news-sentiment-engine/SKILL.md"
+    },
+    {
       "id": "nextjs-app-router-patterns",
       "name": "nextjs-app-router-patterns",
       "description": "Comprehensive patterns for Next.js 14+ App Router architecture, Server Components, and modern full-stack React development.",
@@ -23892,6 +24117,34 @@
       "path": "skills/openclaw-github-repo-commander/SKILL.md"
     },
     {
+      "id": "options-flow-analyzer",
+      "name": "options-flow-analyzer",
+      "description": "Real vs lottery call separation for options P/C ratio analysis — prevents signal inversion from deep OTM noise",
+      "category": "general",
+      "tags": [
+        "options",
+        "sentiment-analysis",
+        "trading",
+        "polygon",
+        "market-analysis"
+      ],
+      "triggers": [
+        "options",
+        "sentiment-analysis",
+        "trading",
+        "polygon",
+        "market-analysis",
+        "flow",
+        "analyzer",
+        "real",
+        "vs",
+        "lottery",
+        "call",
+        "separation"
+      ],
+      "path": "skills/options-flow-analyzer/SKILL.md"
+    },
+    {
       "id": "oral-health-analyzer",
       "name": "oral-health-analyzer",
       "description": "分析口腔健康数据、识别口腔问题模式、评估口腔健康状况、提供个性化口腔健康建议。支持与营养、慢性病、用药等其他健康数据的关联分析。",
@@ -24284,6 +24537,32 @@
       "path": "skills/pci-compliance/SKILL.md"
     },
     {
+      "id": "pdf-conversion-router",
+      "name": "pdf-conversion-router",
+      "description": "Use when converting a PDF into another format such as Markdown, HTML, text, JSON, DOCX, or structured notes and the agent must choose the best extraction route, settings, and cleanup strategy for maximum fidelity and readability.",
+      "category": "general",
+      "tags": [
+        "pdf",
+        "conversion",
+        "router"
+      ],
+      "triggers": [
+        "pdf",
+        "conversion",
+        "router",
+        "converting",
+        "another",
+        "format",
+        "such",
+        "markdown",
+        "html",
+        "text",
+        "json",
+        "docx"
+      ],
+      "path": "skills/pdf-conversion-router/SKILL.md"
+    },
+    {
       "id": "pdf-official",
       "name": "pdf-official",
       "description": "This guide covers essential PDF processing operations using Python libraries and command-line tools. For advanced features, JavaScript libraries, and detailed examples, see reference.md. If you need to fill out a PDF form, read forms.md and follow its instructions.",
@@ -24514,6 +24793,32 @@
         "until"
       ],
       "path": "skills/phase-gated-debugging/SKILL.md"
+    },
+    {
+      "id": "photopea-embedded-editor",
+      "name": "photopea-embedded-editor",
+      "description": "Embed Photopea in web apps using photopea.js. Covers embedding, file I/O, scripting, exporting, layers, text, filters, and the full Photoshop-compatible API.",
+      "category": "data-ai",
+      "tags": [
+        "photopea",
+        "embedded",
+        "editor"
+      ],
+      "triggers": [
+        "photopea",
+        "embedded",
+        "editor",
+        "embed",
+        "web",
+        "apps",
+        "js",
+        "covers",
+        "embedding",
+        "file",
+        "scripting",
+        "exporting"
+      ],
+      "path": "skills/photopea-embedded-editor/SKILL.md"
     },
     {
       "id": "php-pro",
@@ -26614,6 +26919,37 @@
         "performance"
       ],
       "path": "skills/receiving-code-review/SKILL.md"
+    },
+    {
+      "id": "recsys-pipeline-architect",
+      "name": "recsys-pipeline-architect",
+      "description": "Designs composable recommendation, ranking, and feed pipelines using the six-stage Source→Hydrator→Filter→Scorer→Selector→SideEffect framework",
+      "category": "infrastructure",
+      "tags": [
+        "recommender-system",
+        "ranking",
+        "feed-algorithm",
+        "recsys",
+        "personalization",
+        "for-you-feed",
+        "rag-reranker",
+        "pipeline-architecture"
+      ],
+      "triggers": [
+        "recommender-system",
+        "ranking",
+        "feed-algorithm",
+        "recsys",
+        "personalization",
+        "for-you-feed",
+        "rag-reranker",
+        "pipeline-architecture",
+        "pipeline",
+        "architect",
+        "designs",
+        "composable"
+      ],
+      "path": "skills/recsys-pipeline-architect/SKILL.md"
     },
     {
       "id": "recursive-context-pruning-token-budgeting",
@@ -30360,6 +30696,42 @@
       "path": "skills/social-proof-architect/SKILL.md"
     },
     {
+      "id": "socialclaw",
+      "name": "socialclaw",
+      "description": "Agent-first social media publishing skill — schedule and publish posts across 13 platforms (X, LinkedIn, Instagram, Facebook Pages, TikTok, Discord, Telegram, YouTube, Reddit, WordPress, Pinterest) via a single workspace API key.",
+      "category": "development",
+      "tags": [
+        "social-media",
+        "publishing",
+        "scheduling",
+        "marketing",
+        "twitter",
+        "linkedin",
+        "instagram",
+        "tiktok",
+        "discord",
+        "telegram",
+        "reddit",
+        "wordpress",
+        "pinterest"
+      ],
+      "triggers": [
+        "social-media",
+        "publishing",
+        "scheduling",
+        "marketing",
+        "twitter",
+        "linkedin",
+        "instagram",
+        "tiktok",
+        "discord",
+        "telegram",
+        "reddit",
+        "wordpress"
+      ],
+      "path": "skills/socialclaw/SKILL.md"
+    },
+    {
       "id": "software-architecture",
       "name": "software-architecture",
       "description": "Guide for quality focused software architecture. This skill should be used when users want to write code, design architecture, analyze code, in any case that relates to software development.",
@@ -31146,6 +31518,34 @@
         "session"
       ],
       "path": "skills/subagent-driven-development/SKILL.md"
+    },
+    {
+      "id": "subagent-orchestrator",
+      "name": "subagent-orchestrator",
+      "description": "Coordinate quota-aware parallel subagents for large, multi-file Antigravity tasks.",
+      "category": "workflow",
+      "tags": [
+        "subagents",
+        "orchestration",
+        "quota",
+        "parallel",
+        "multi-agent"
+      ],
+      "triggers": [
+        "subagents",
+        "orchestration",
+        "quota",
+        "parallel",
+        "multi-agent",
+        "subagent",
+        "orchestrator",
+        "coordinate",
+        "aware",
+        "large",
+        "multi",
+        "file"
+      ],
+      "path": "skills/subagent-orchestrator/SKILL.md"
     },
     {
       "id": "subject-line-psychologist",
@@ -32672,6 +33072,39 @@
         "composio"
       ],
       "path": "skills/todoist-automation/SKILL.md"
+    },
+    {
+      "id": "tokenwise",
+      "name": "tokenwise",
+      "description": "Measurement-driven model router for Claude Code. Routes Haiku/Sonnet/Opus per task class, logs every routed task with real $ numbers, and A/B tests cheaper tiers before you trust the savings.",
+      "category": "security",
+      "tags": [
+        "model-routing",
+        "token-optimization",
+        "cost-reduction",
+        "anthropic",
+        "haiku",
+        "sonnet",
+        "opus",
+        "claude-code",
+        "ab-testing",
+        "measurement"
+      ],
+      "triggers": [
+        "model-routing",
+        "token-optimization",
+        "cost-reduction",
+        "anthropic",
+        "haiku",
+        "sonnet",
+        "opus",
+        "claude-code",
+        "ab-testing",
+        "measurement",
+        "tokenwise",
+        "driven"
+      ],
+      "path": "skills/tokenwise/SKILL.md"
     },
     {
       "id": "tool-design",
@@ -34756,6 +35189,35 @@
       "path": "skills/webflow-automation/SKILL.md"
     },
     {
+      "id": "wechat-official-account-strategist",
+      "name": "wechat-official-account-strategist",
+      "description": "Grow WeChat Official Accounts (微信公众号) with high-conversion content strategy, title formulas, article architecture, and Mini-Program integration.",
+      "category": "architecture",
+      "tags": [
+        "wechat",
+        "chinese-market",
+        "content-strategy",
+        "marketing",
+        "公众号",
+        "微信"
+      ],
+      "triggers": [
+        "wechat",
+        "chinese-market",
+        "content-strategy",
+        "marketing",
+        "公众号",
+        "微信",
+        "official",
+        "account",
+        "strategist",
+        "grow",
+        "accounts",
+        "high"
+      ],
+      "path": "skills/wechat-official-account-strategist/SKILL.md"
+    },
+    {
       "id": "weightloss-analyzer",
       "name": "weightloss-analyzer",
       "description": "分析减肥数据、计算代谢率、追踪能量缺口、管理减肥阶段",
@@ -35396,7 +35858,7 @@
     {
       "id": "x-twitter-scraper",
       "name": "x-twitter-scraper",
-      "description": "X/Twitter automation skill for tweet search, follower export, media download, posting, replies, DMs, webhooks, MCP, SDKs, and the TweetClaw OpenClaw plugin.",
+      "description": "X/Twitter automation skill for tweet search, follower export, posting, DMs, webhooks, MCP, SDKs, Hermes Tweet, and TweetClaw.",
       "category": "workflow",
       "tags": [
         "twitter",
@@ -35409,6 +35871,8 @@
         "mcp",
         "sdk",
         "webhooks",
+        "hermes-agent",
+        "hermes-tweet",
         "openclaw",
         "tweetclaw"
       ],
@@ -35423,8 +35887,8 @@
         "mcp",
         "sdk",
         "webhooks",
-        "openclaw",
-        "tweetclaw"
+        "hermes-agent",
+        "hermes-tweet"
       ],
       "path": "skills/x-twitter-scraper/SKILL.md"
     },
@@ -35455,6 +35919,36 @@
         "para"
       ],
       "path": "skills/x402-express-wrapper/SKILL.md"
+    },
+    {
+      "id": "xiaohongshu-content-strategist",
+      "name": "xiaohongshu-content-strategist",
+      "description": "Create viral Xiaohongshu (小红书) content with platform-native strategy, save-rate optimization, trending formats, and search SEO for China's #1 lifestyle platform.",
+      "category": "business",
+      "tags": [
+        "xiaohongshu",
+        "chinese-market",
+        "content-strategy",
+        "social-media",
+        "marketing",
+        "红书",
+        "小红书"
+      ],
+      "triggers": [
+        "xiaohongshu",
+        "chinese-market",
+        "content-strategy",
+        "social-media",
+        "marketing",
+        "红书",
+        "小红书",
+        "content",
+        "strategist",
+        "viral",
+        "platform",
+        "native"
+      ],
+      "path": "skills/xiaohongshu-content-strategist/SKILL.md"
     },
     {
       "id": "xlsx-official",
