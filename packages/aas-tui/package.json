@@ -1,0 +1,26 @@
+{
+  "name": "aas-tui",
+  "version": "1.0.0",
+  "description": "Interactive TUI for Antigravity Awesome Skills — browse, search & install agentic skills for Claude Code, Cursor, Gemini CLI & more.",
+  "bin": {
+    "aas-tui": "bin.js"
+  },
+  "files": [
+    "bin.js"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sickn33/antigravity-awesome-skills.git",
+    "directory": "packages/aas-tui"
+  },
+  "keywords": [
+    "claude-code",
+    "cursor",
+    "gemini-cli",
+    "antigravity",
+    "agentic-skills",
+    "ai-coding",
+    "tui"
+  ]
+}
