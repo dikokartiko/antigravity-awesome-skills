@@ -93,7 +93,6 @@ function runCommand(command, args, cwd, options = {}) {
       : options.input !== undefined
         ? ["pipe", "inherit", "inherit"]
         : ["inherit", "inherit", "inherit"],
-    shell: process.platform === "win32",
   });
 
   if (result.error) {
@@ -481,7 +480,14 @@ function gitPullMain(projectRoot) {
 }
 
 function syncContributors(projectRoot) {
-  runCommand("npm", ["run", "sync:contributors"], projectRoot);
+  runCommand(
+    process.execPath,
+    [
+      path.join(projectRoot, "tools", "scripts", "run-python.js"),
+      path.join(projectRoot, "tools", "scripts", "sync_contributors.py"),
+    ],
+    projectRoot,
+  );
 }
 
 function commitAndPushReadmeIfChanged(projectRoot) {
@@ -683,6 +689,7 @@ module.exports = {
   parseArgs,
   parsePrList,
   readRepositorySlug,
+  runCommand,
   runBatch,
   selectLatestCheckRuns,
   stripDisallowedCoauthorTrailers,

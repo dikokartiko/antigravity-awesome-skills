@@ -9,6 +9,116 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.10.0] - 2026-05-31 - "SEO, Yield, YouTube, and Release Hardening"
+
+> Installable skill library update for Claude Code, Cursor, Codex CLI, Gemini CLI, Antigravity, and related AI coding assistants.
+
+Start here:
+
+- Install: `npx antigravity-awesome-skills --help`
+- Choose your tool: [README.md#choose-your-tool](README.md#choose-your-tool)
+- Best skills by tool: [README.md#best-skills-by-tool](README.md#best-skills-by-tool)
+- Bundles: [docs/users/bundles.md](docs/users/bundles.md)
+- Workflows: [docs/users/workflows.md](docs/users/workflows.md)
+
+This release merges the accepted community PRs from the current maintainer batch, adding SEO production workflows, passive-income analysis, grounded math-spec extraction, AI disruption planning, and API-backed YouTube research.
+
+## New Skills
+
+- **nextjs-seo-indexing** - Next.js indexing diagnostics and production SEO remediation for metadata, rendering, canonicals, sitemaps, robots, and Search Console workflows.
+- **schema-markup-generator** - structured-data generation and validation for products, articles, FAQs, breadcrumbs, organizations, local businesses, and rich-result eligibility.
+- **social-metadata-hardening** - Open Graph, Twitter/X card, preview-image, and share-surface hardening for production web pages.
+- **vibe-code-cleanup** - production cleanup workflow for AI-generated web apps, removing placeholders, fragile logic, and demo-only artifacts before launch.
+- **vibecode-production-qa-validator** - launch QA for AI-assisted web builds across SEO, accessibility, copy, responsive behavior, performance, and deployment readiness.
+- **yield-intelligence** - passive-income portfolio analysis across Treasuries, dividend ETFs, REITs, and preferred stocks.
+- **doc2math** - grounded conversion of narrative technical documents into Mathematical Problem Specifications.
+- **moatmri** - AI disruption pressure mapping with 10-vector exposure scoring and a 90-day defensive plan.
+- **youtube-full** - TranscriptAPI-backed YouTube transcript, search, channel, playlist, and monitoring workflows for cloud-safe video research.
+
+## Improvements
+
+- Added batch output options and refreshed generated registry, catalog, compatibility, plugin mirror, documentation, and web assets for the expanded catalog.
+- Hardened unsafe skill guidance and made security hygiene tests self-contained for CI.
+- Improved `agy install` handling and Windows test portability.
+- Updated the star history chart and release-state metadata.
+
+## Credits
+
+- **[@WHOISABHISHEKADHIKARI](https://github.com/WHOISABHISHEKADHIKARI)** for PR #638 (`nextjs-seo-indexing`, `schema-markup-generator`, `social-metadata-hardening`, `vibe-code-cleanup`, `vibecode-production-qa-validator`, and SEO batch output updates).
+- **[@KyleMillion](https://github.com/KyleMillion)** and **[IntuiTek¹](https://intuitek.ai)** for PR #637 (`yield-intelligence`, `doc2math`, `moatmri`).
+- **[@therohitdas](https://github.com/therohitdas)** and **[ZeroPointRepo/youtube-skills](https://github.com/ZeroPointRepo/youtube-skills)** for PR #633 (`youtube-full`).
+
+## [11.9.0] - 2026-05-30 - "Container, CI, Market, and Wallet Guard Skills"
+
+> Installable skill library update for Claude Code, Cursor, Codex CLI, Gemini CLI, Antigravity, and related AI coding assistants.
+
+Start here:
+
+- Install: `npx antigravity-awesome-skills --help`
+- Choose your tool: [README.md#choose-your-tool](README.md#choose-your-tool)
+- Best skills by tool: [README.md#best-skills-by-tool](README.md#best-skills-by-tool)
+- Bundles: [docs/users/bundles.md](docs/users/bundles.md)
+- Workflows: [docs/users/workflows.md](docs/users/workflows.md)
+
+This release merges the accepted community and official skill PRs from the current maintainer batch, adding container hardening, advanced GitHub Actions workflows, Longbridge market-data guidance, and paid-inference wallet guards.
+
+## New Skills
+
+- **container-security-hardening** - Docker/container image and runtime hardening for base images, CVE scanning, SBOM/signing, seccomp/AppArmor, and Kubernetes pod-security controls.
+- **github-actions-advanced** - production-grade GitHub Actions CI/CD design, debugging, reusable workflows, OIDC authentication, caching, environments, secrets, and release automation.
+- **longbridge** - official Longbridge Securities market-data workflow for quotes, charts, fundamentals, portfolios, options, and trilingual HK/US/A-share/SG market analysis.
+- **runaway-guard** - cost-safety discipline for paid AI/inference APIs with per-run, per-day, iteration, concurrency, and provider-dashboard wallet caps.
+
+## Improvements
+
+- Normalized incoming PR metadata, source credits, and security-sensitive install snippets before merge so maintainer CI stayed green.
+- Synced generated registry, catalog, compatibility, plugin mirror, documentation, and web assets for the expanded skill catalog.
+
+## Credits
+
+- **[@sahilaghara1911](https://github.com/sahilaghara1911)** for PR #632 (`container-security-hardening`) and PR #631 (`github-actions-advanced`).
+- **[@hogan-yuan](https://github.com/hogan-yuan)** and **[longbridge/skills](https://github.com/longbridge/skills)** for PR #630 (`longbridge`).
+- **[@morsechimwai](https://github.com/morsechimwai)** and **[morsechimwai/lemmaly](https://github.com/morsechimwai/lemmaly)** for PR #629 (`runaway-guard`).
+
+## [11.8.0] - 2026-05-27 - "Decision, Messaging, Algorithm, and Supply-Chain Skills"
+
+> Installable skill library update for Claude Code, Cursor, Codex CLI, Gemini CLI, Antigravity, and related AI coding assistants.
+
+Start here:
+
+- Install: `npx antigravity-awesome-skills --help`
+- Choose your tool: [README.md#choose-your-tool](README.md#choose-your-tool)
+- Best skills by tool: [README.md#best-skills-by-tool](README.md#best-skills-by-tool)
+- Bundles: [docs/users/bundles.md](docs/users/bundles.md)
+- Workflows: [docs/users/workflows.md](docs/users/workflows.md)
+
+This release merges the accepted community skill PRs from the current maintainer batch, adding decision support, Sendblue messaging workflows, algorithmic discipline playbooks, and a Bumblebee supply-chain inventory wrapper.
+
+## New Skills
+
+- **lemmaly** - gateway discipline for stating Big-O, data structure, and algorithm family before writing loops, queries, or recursion.
+- **mathguard** - large-input acceleration playbook for Bloom filters, HyperLogLog, Count-Min Sketch, FFT, LSH, and related techniques.
+- **invariant-guard** - correctness-first workflow for contracts, loop invariants, termination arguments, and edge cases.
+- **complexity-cuts** - corrective workflow for improving shipped code with poor Big-O one transformation at a time.
+- **sendblue-cli** - Sendblue CLI guidance for iMessage, SMS, and RCS workflows.
+- **sendblue-api** - Sendblue HTTP/JSON API guidance for application code.
+- **sendblue-notify** - notification patterns for texting a user when an agent task is done.
+- **textme** - local daemon workflow for bridging inbound iMessages into Claude Code sessions.
+- **bumblebee** - read-only supply-chain inventory and exposure scanning with Perplexity's Bumblebee CLI.
+- **decision-navigator** - targeted-question workflow for helping users gain clarity on decisions before choosing a path.
+
+## Improvements
+
+- Added a stdlib-only Bumblebee report renderer for local Markdown summaries from NDJSON scan output.
+- Synced generated registry, catalog, compatibility, plugin mirror, documentation, and web assets for the expanded skill catalog.
+
+## Credits
+
+- **[@morsechimwai](https://github.com/morsechimwai)** and **[morsechimwai/lemmaly](https://github.com/morsechimwai/lemmaly)** for PR #622 (`lemmaly`, `mathguard`, `invariant-guard`, `complexity-cuts`).
+- **[@AnthonyFirth](https://github.com/AnthonyFirth)** for PR #623 (`sendblue-cli`, `sendblue-api`, `sendblue-notify`, `textme`).
+- **[@stefan-kp](https://github.com/stefan-kp)**, **[perplexityai/bumblebee](https://github.com/perplexityai/bumblebee)**, and **[mycelos-ai/bumblebee-skill](https://github.com/mycelos-ai/bumblebee-skill)** for PR #625 (`bumblebee`).
+- **[@kavinduUdhara](https://github.com/kavinduUdhara)** for PR #627 (`decision-navigator`).
+
 ## [11.7.0] - 2026-05-26 - "Community Skill Intake and Merge Hygiene"
 
 > Installable skill library update for Claude Code, Cursor, Codex CLI, Gemini CLI, Antigravity, and related AI coding assistants.

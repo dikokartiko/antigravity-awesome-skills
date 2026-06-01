@@ -1,6 +1,7 @@
 import https from 'https';
 import fs from 'fs';
 import path from 'path';
+import zlib from 'zlib';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
@@ -130,28 +131,156 @@ function validateArchiveEntryName(entryName) {
     return normalized === ARCHIVE_ROOT.slice(0, -1) || normalized.startsWith(ARCHIVE_ROOT);
 }
 
-function parseTarVerboseEntryNames(listing) {
-    return String(listing || '')
-        .split(/\r?\n/)
-        .map((line) => line.trim())
-        .filter(Boolean)
-        .map((line) => {
-            const match = line.match(/^\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+(.+)$/);
-            return match ? match[1].replace(/\s+->\s+.*$/, '') : line;
-        });
+function archiveEntryName(entry) {
+    return typeof entry === 'string' ? entry : entry?.name;
 }
 
-function assertSafeArchiveEntries(entries, { rejectSymlinks = false } = {}) {
+function archiveEntryType(entry) {
+    return typeof entry === 'string' ? '' : String(entry?.type || '');
+}
+
+function assertSafeArchiveEntries(entries, { rejectLinks = false, rejectSymlinks = rejectLinks } = {}) {
     for (const rawEntry of entries) {
-        const entry = String(rawEntry || '').trim();
+        const entry = String(archiveEntryName(rawEntry) || '').trim();
         if (!entry) continue;
-        if (rejectSymlinks && /\s+->\s+/.test(entry)) {
+        const entryType = archiveEntryType(rawEntry);
+        if (rejectSymlinks && typeof rawEntry === 'string' && /\s+->\s+/.test(entry)) {
             throw new Error(`Unsafe archive symlink entry: ${entry}`);
         }
-        if (!validateArchiveEntryName(entry.replace(/\s+->\s+.*$/, ''))) {
+        if (rejectLinks && (entryType === '1' || entryType === '2')) {
+            throw new Error(`Unsafe archive link entry: ${entry}`);
+        }
+        if (!validateArchiveEntryName(entry)) {
             throw new Error(`Unsafe archive entry path: ${entry}`);
         }
     }
+}
+
+function readTarString(block, start, length) {
+    const bytes = block.subarray(start, start + length);
+    const end = bytes.indexOf(0);
+    return bytes.subarray(0, end === -1 ? bytes.length : end).toString('utf8');
+}
+
+function readTarNumber(block, start, length) {
+    const raw = readTarString(block, start, length).trim();
+    return raw ? Number.parseInt(raw.replace(/\0/g, '').trim(), 8) || 0 : 0;
+}
+
+function parsePaxRecords(buffer) {
+    const records = {};
+    let offset = 0;
+
+    while (offset < buffer.length) {
+        const space = buffer.indexOf(0x20, offset);
+        if (space === -1) break;
+        const length = Number.parseInt(buffer.subarray(offset, space).toString('ascii'), 10);
+        if (!Number.isInteger(length) || length <= 0 || offset + length > buffer.length) break;
+        const record = buffer.subarray(space + 1, offset + length - 1).toString('utf8');
+        const equals = record.indexOf('=');
+        if (equals > 0) {
+            records[record.slice(0, equals)] = record.slice(equals + 1);
+        }
+        offset += length;
+    }
+
+    return records;
+}
+
+function readTarGzipEntries(archivePath) {
+    const archive = zlib.gunzipSync(fs.readFileSync(archivePath));
+    const entries = [];
+    let offset = 0;
+    let pax = {};
+    let longName = null;
+    let longLink = null;
+
+    while (offset + 512 <= archive.length) {
+        const header = archive.subarray(offset, offset + 512);
+        if (header.every((byte) => byte === 0)) break;
+
+        const type = String.fromCharCode(header[156] || 0);
+        const size = readTarNumber(header, 124, 12);
+        const dataStart = offset + 512;
+        const dataEnd = dataStart + size;
+        const data = archive.subarray(dataStart, Math.min(dataEnd, archive.length));
+        const dataBlocks = Math.ceil(size / 512) * 512;
+
+        if (type === 'x' || type === 'g') {
+            pax = { ...pax, ...parsePaxRecords(data) };
+        } else if (type === 'L') {
+            longName = data.toString('utf8').replace(/\0.*$/s, '');
+        } else if (type === 'K') {
+            longLink = data.toString('utf8').replace(/\0.*$/s, '');
+        } else {
+            const name = longName || pax.path || [readTarString(header, 345, 155), readTarString(header, 0, 100)]
+                .filter(Boolean)
+                .join('/');
+            const linkName = longLink || pax.linkpath || readTarString(header, 157, 100);
+            entries.push({ name, type: type || '0', linkName });
+            pax = {};
+            longName = null;
+            longLink = null;
+        }
+
+        offset += 512 + dataBlocks;
+    }
+
+    return entries;
+}
+
+function findZipEndOfCentralDirectory(buffer) {
+    const minOffset = Math.max(0, buffer.length - 22 - 0xffff);
+    for (let offset = buffer.length - 22; offset >= minOffset; offset -= 1) {
+        if (buffer.readUInt32LE(offset) === 0x06054b50) {
+            return offset;
+        }
+    }
+    throw new Error('ZIP end of central directory not found.');
+}
+
+function readZipEntries(archivePath) {
+    const archive = fs.readFileSync(archivePath);
+    const eocd = findZipEndOfCentralDirectory(archive);
+    const totalEntries = archive.readUInt16LE(eocd + 10);
+    const centralSize = archive.readUInt32LE(eocd + 12);
+    const centralOffset = archive.readUInt32LE(eocd + 16);
+
+    if (totalEntries === 0xffff || centralSize === 0xffffffff || centralOffset === 0xffffffff) {
+        throw new Error('ZIP64 archives are not supported by the safe archive validator.');
+    }
+
+    const entries = [];
+    let offset = centralOffset;
+    const centralEnd = centralOffset + centralSize;
+
+    while (offset < centralEnd) {
+        if (archive.readUInt32LE(offset) !== 0x02014b50) {
+            throw new Error('Invalid ZIP central directory entry.');
+        }
+
+        const fileNameLength = archive.readUInt16LE(offset + 28);
+        const extraLength = archive.readUInt16LE(offset + 30);
+        const commentLength = archive.readUInt16LE(offset + 32);
+        const externalAttributes = archive.readUInt32LE(offset + 38);
+        const nameStart = offset + 46;
+        const name = archive.subarray(nameStart, nameStart + fileNameLength).toString('utf8');
+        const unixMode = externalAttributes >>> 16;
+        const fileType = unixMode & 0o170000;
+
+        entries.push({
+            name,
+            type: fileType === 0o120000 ? '2' : name.endsWith('/') ? '5' : '0',
+        });
+
+        offset = nameStart + fileNameLength + extraLength + commentLength;
+    }
+
+    if (entries.length !== totalEntries) {
+        throw new Error('ZIP central directory entry count mismatch.');
+    }
+
+    return entries;
 }
 
 function assertSafeExtractedTree(extractedRoot, tempDir) {
@@ -183,22 +312,11 @@ function assertSafeExtractedTree(extractedRoot, tempDir) {
 
 function listArchiveEntries(archivePath, useTar) {
     if (useTar) {
-        const verbose = execSync(`tar -tzvf "${archivePath}"`, { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'pipe'] });
-        assertSafeArchiveEntries(parseTarVerboseEntryNames(verbose), { rejectSymlinks: true });
+        assertSafeArchiveEntries(readTarGzipEntries(archivePath), { rejectLinks: true });
         return;
     }
 
-    if (globalThis.process?.platform === 'win32') {
-        const listing = execSync(
-            `powershell -NoProfile -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [IO.Compression.ZipFile]::OpenRead('${archivePath}').Entries | ForEach-Object { $_.FullName }"`,
-            { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'pipe'] },
-        );
-        assertSafeArchiveEntries(listing.split(/\r?\n/));
-        return;
-    }
-
-    const listing = execSync(`unzip -Z1 "${archivePath}"`, { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'pipe'] });
-    assertSafeArchiveEntries(listing.split(/\r?\n/));
+    assertSafeArchiveEntries(readZipEntries(archivePath), { rejectLinks: true });
 }
 
 /** Run a git command in the project root. */
@@ -503,6 +621,8 @@ export {
     assertSafeArchiveEntries,
     assertSafeExtractedTree,
     normalizeArchiveEntryName,
+    readTarGzipEntries,
+    readZipEntries,
     validateArchiveEntryName,
 };
 

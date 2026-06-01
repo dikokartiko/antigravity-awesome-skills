@@ -24,6 +24,30 @@ const mockHunterSkill = fs.readFileSync(
   path.join(repoRoot, 'skills', 'mock-hunter', 'SKILL.md'),
   'utf8',
 );
+const longbridgeSkill = fs.readFileSync(
+  path.join(repoRoot, 'skills', 'longbridge', 'SKILL.md'),
+  'utf8',
+);
+const mercurySkill = fs.readFileSync(
+  path.join(repoRoot, 'skills', 'mercury-mcp', 'SKILL.md'),
+  'utf8',
+);
+const socialclawSkill = fs.readFileSync(
+  path.join(repoRoot, 'skills', 'socialclaw', 'SKILL.md'),
+  'utf8',
+);
+const bumblebeeSkill = fs.readFileSync(
+  path.join(repoRoot, 'skills', 'bumblebee', 'SKILL.md'),
+  'utf8',
+);
+const githubActionsAdvancedSkill = fs.readFileSync(
+  path.join(repoRoot, 'skills', 'github-actions-advanced', 'SKILL.md'),
+  'utf8',
+);
+const photopeaSkill = fs.readFileSync(
+  path.join(repoRoot, 'skills', 'photopea-embedded-editor', 'SKILL.md'),
+  'utf8',
+);
 
 function fencedBlocks(content, language) {
   const blocks = [];
@@ -271,6 +295,30 @@ assert.strictEqual(
 assert.match(mockHunterSkill, /^risk:\s*critical$/m, 'MockHunter must not be classified as plugin-safe');
 assert.match(mockHunterSkill, /^\s+codex:\s*blocked$/m, 'MockHunter must be blocked from Codex plugin bundle');
 assert.match(mockHunterSkill, /^\s+claude:\s*blocked$/m, 'MockHunter must be blocked from Claude plugin bundle');
+for (const [name, content] of [
+  ['longbridge', longbridgeSkill],
+  ['mercury-mcp', mercurySkill],
+  ['socialclaw', socialclawSkill],
+]) {
+  assert.match(content, /^risk:\s*critical$/m, `${name} must not be classified as safe`);
+  assert.match(content, /^\s+codex:\s*blocked$/m, `${name} must be blocked from Codex plugin bundle`);
+  assert.match(content, /^\s+claude:\s*blocked$/m, `${name} must be blocked from Claude plugin bundle`);
+}
+assert.doesNotMatch(
+  bumblebeeSkill,
+  /^\s*python3 scripts\/render_report\.py\b/m,
+  'Bumblebee must not invoke helper scripts via workspace-relative paths',
+);
+assert.doesNotMatch(
+  githubActionsAdvancedSkill,
+  /run:\s+npm ci \$\{\{\s*inputs\.install-flags\s*\}\}/,
+  'GitHub Actions examples must not interpolate action inputs directly into run steps',
+);
+assert.doesNotMatch(
+  photopeaSkill,
+  /textItem\.contents\s*=\s*"\$\{(?:name|tagline)\}"/,
+  'Photopea examples must serialize dynamic text before embedding it in runScript',
+);
 
 function violationCount(list) {
   return list.length;
